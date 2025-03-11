@@ -104,7 +104,8 @@ func ResetPassword(c *gin.Context) {
         return
     }
 
-    if !utils.ValidateResetToken(input.Email, input.Token) {
+    claims, valid := utils.ValidateResetToken(input.Email, input.Token)
+    if !valid {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
         return
     }
@@ -115,7 +116,7 @@ func ResetPassword(c *gin.Context) {
         return
     }
 
-    if err := config.DB.Model(&models.User{}).Where("email = ?", input.Email).Update("password", hashedPassword).Error; err != nil {
+    if err := config.DB.Model(&models.User{}).Where("email = ?", claims.Email).Update("password", hashedPassword).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Password update failed"})
         return
     }
