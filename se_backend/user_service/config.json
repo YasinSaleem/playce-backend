@@ -1,0 +1,5 @@
+{
+    "database": {
+        "url": "host=localhost user=root dbname=playce sslmode=disable password=root"
+    }
+}
