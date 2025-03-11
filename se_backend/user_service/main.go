@@ -9,8 +9,10 @@ import (
 func main() {
 	config.LoadConfig()
 	config.ConnectDatabase()
-	r := routes.SetupRoutes()
-	if err := r.Run(":8080"); err != nil {
+
+	e := routes.SetupRoutes()
+
+	if err := e.Start(":8080"); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
 }

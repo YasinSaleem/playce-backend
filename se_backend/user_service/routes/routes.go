@@ -1,18 +1,27 @@
 package routes
 
 import (
-    "github.com/gin-gonic/gin"
-    "user_service/controllers"
+	"user_service/controllers"
+	"user_service/middlewares"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func SetupRoutes() *gin.Engine {
-    router := gin.Default()
-    userRoutes := router.Group("/user")
-    {
-        userRoutes.POST("/signup", controllers.SignUp)
-        userRoutes.POST("/signin", controllers.SignIn)
-        userRoutes.POST("/forgot-password", controllers.ForgotPassword)
-        userRoutes.POST("/reset-password", controllers.ResetPassword)
-    }
-    return router
+func SetupRoutes() *echo.Echo {
+	// Create a new Echo instance
+	e := echo.New()
+
+	// Add middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middlewares.LoggerMiddleware())
+
+	// User routes
+	e.POST("/user/signup", controllers.SignUp)
+	e.POST("/user/signin", controllers.SignIn)
+	e.POST("/user/forgot-password", controllers.ForgotPassword)
+	e.POST("/user/reset-password", controllers.ResetPassword)
+
+	return e
 }
