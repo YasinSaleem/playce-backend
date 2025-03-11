@@ -1,11 +1,13 @@
 package controllers
 
 import (
-    "net/http"
-    "github.com/gin-gonic/gin"
-    "golang.org/x/crypto/bcrypt"
-    "user_service/models"
-    "user_service/utils"
+	"net/http"
+	"user_service/config"
+	"user_service/models"
+	"user_service/utils"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func HashPassword(password string) (string, error) {
@@ -32,7 +34,7 @@ func SignUp(c *gin.Context) {
     }
     user.Password = hashedPassword
 
-    if err := models.DB.Create(&user).Error; err != nil {
+    if err := config.DB.Create(&user).Error; err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "User already exists"})
         return
     }
@@ -48,7 +50,7 @@ func SignIn(c *gin.Context) {
     }
 
     var user models.User
-    if err := models.DB.Where("email = ?", credentials.Email).First(&user).Error; err != nil {
+    if err := config.DB.Where("email = ?", credentials.Email).First(&user).Error; err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
         return
     }
@@ -77,7 +79,7 @@ func ForgotPassword(c *gin.Context) {
     }
 
     var user models.User
-    if err := models.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
+    if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
         return
     }
@@ -113,7 +115,7 @@ func ResetPassword(c *gin.Context) {
         return
     }
 
-    if err := models.DB.Model(&models.User{}).Where("email = ?", input.Email).Update("password", hashedPassword).Error; err != nil {
+    if err := config.DB.Model(&models.User{}).Where("email = ?", input.Email).Update("password", hashedPassword).Error; err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Password update failed"})
         return
     }
