@@ -1,18 +1,19 @@
 package middlewares
 
 import (
-    "net/http"
-    "github.com/gin-gonic/gin"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
-    return func(c *gin.Context) {
-        token := c.GetHeader("Authorization")
-        if token == "" {
-            c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})
-            c.Abort()
-            return
-        }
-        c.Next()
-    }
+func AuthMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token := c.Request().Header.Get("Authorization")
+			if token == "" {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization token required"})
+			}
+			return next(c)
+		}
+	}
 }

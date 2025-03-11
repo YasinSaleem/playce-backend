@@ -4,22 +4,27 @@ import (
 	"post_service/controllers"
 	"post_service/middlewares"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func SetupRoutes() *gin.Engine {
-	r := gin.Default()
+func SetupRoutes() *echo.Echo {
+	// Create a new Echo instance
+	e := echo.New()
+
+	// Add middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middlewares.LoggerMiddleware())
 
 	// Public Routes
-	r.GET("/posts", controllers.GetAllPosts)
-	r.GET("/posts/:userId", controllers.GetUserPosts)
+	e.GET("/posts", controllers.GetAllPosts)
+	e.GET("/posts/:userId", controllers.GetUserPosts)
 
 	// Protected Routes
-	authorized := r.Group("/")
-	authorized.Use(middlewares.AuthMiddleware())
-	{
-		authorized.POST("/posts", controllers.CreatePost)
-	}
+	posts := e.Group("")
+	posts.Use(middlewares.AuthMiddleware())
+	posts.POST("/posts", controllers.CreatePost)
 
-	return r
+	return e
 }
