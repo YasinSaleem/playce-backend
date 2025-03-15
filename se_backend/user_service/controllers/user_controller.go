@@ -131,3 +131,30 @@ func ResetPassword(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Password reset successfully"})
 }
+
+func PostUserProfile(c echo.Context) error {
+	var profile models.UserProfile
+
+	if err := c.Bind(&profile); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
+	}
+
+	if err := config.DB.Create(&profile).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Profile already exists"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "User Profile registered successfully"})
+
+}
+
+func GetUserProfile(c echo.Context) error {
+	userID := c.Param("user_id")
+
+	var profile models.UserProfile
+
+	if err := config.DB.First(&profile, "user_id = ?", userID).Error; err != nil {
+        return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+    }
+
+	return c.JSON(http.StatusOK, profile)
+}

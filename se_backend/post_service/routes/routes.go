@@ -19,12 +19,14 @@ func SetupRoutes() *echo.Echo {
 
 	// Public Routes
 	e.GET("/posts", controllers.GetAllPosts)
-	e.GET("/posts/:userId", controllers.GetUserPosts)
+	e.GET("/posts/:user_id", controllers.GetUserPosts)
 
 	// Protected Routes
 	posts := e.Group("")
 	posts.Use(middlewares.AuthMiddleware())
 	posts.POST("/posts", controllers.CreatePost)
+	posts.POST("/posts/like", controllers.LikePost)
+	posts.POST("/posts/:post_id/comment", controllers.CommentOnPost)
 
 	return e
 }

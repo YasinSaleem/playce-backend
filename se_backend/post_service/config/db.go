@@ -18,4 +18,6 @@ func ConnectDatabase() {
 	}
 
 	DB.AutoMigrate(&models.Post{})
+	DB.AutoMigrate(&models.Like{})
+	DB.AutoMigrate(&models.Comment{})
 }

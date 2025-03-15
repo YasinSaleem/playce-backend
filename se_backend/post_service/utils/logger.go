@@ -35,5 +35,5 @@ func (l *Logger) Error(format string, v ...interface{}) {
 func (l *Logger) LogRequest(method, path, clientIP, userAgent string, statusCode int, latency time.Duration) {
 	message := fmt.Sprintf("Request: %s %s | Status: %d | IP: %s | User-Agent: %s | Latency: %v",
 		method, path, statusCode, clientIP, userAgent, latency)
-	l.Info(message)
+	l.Info("%s", message) // added the %s to get rid of warning. let me know if this is cool
 }
