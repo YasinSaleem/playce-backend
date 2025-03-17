@@ -55,15 +55,14 @@ func AuthMiddleware() echo.MiddlewareFunc {
 				if int64(exp) < time.Now().Unix() {
 					return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Token has expired"})
 				}
-
-				// Add user ID to context for further use
-				userID, ok := claims["user_id"].(float64)
+				email, ok := claims["email"].(string)
 				if !ok {
-					return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID in token"})
+					return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid email in token"})
 				}
-				c.Set("user_id", int(userID))
-
-				fmt.Println("Authenticated user ID:", int(userID)) 
+				c.Set("email", email)
+				
+				fmt.Println("Authenticated user email:", email) 
+				
 				return next(c)
 			} else {
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid token claims"})

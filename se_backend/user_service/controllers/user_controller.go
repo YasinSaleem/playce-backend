@@ -133,19 +133,38 @@ func ResetPassword(c echo.Context) error {
 }
 
 func PostUserProfile(c echo.Context) error {
-	var profile models.UserProfile
+	// Extract the email from the JWT token (set in the middleware)
+	email := c.Get("email").(string)
 
+	// Find the user based on the email
+	var user models.User
+	if err := config.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+
+	// Check if a profile already exists for this user
+	var existingProfile models.UserProfile
+	if err := config.DB.Where("user_id = ?", user.UserID).First(&existingProfile).Error; err == nil {
+		return c.JSON(http.StatusConflict, map[string]string{"error": "Profile already exists"})
+	}
+
+	// Bind the incoming profile data
+	var profile models.UserProfile
 	if err := c.Bind(&profile); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid input"})
 	}
 
+	// Link the profile to the authenticated user
+	profile.UserID = int(user.UserID)
+
+	// Save the profile to the database
 	if err := config.DB.Create(&profile).Error; err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Profile already exists"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create profile"})
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "User Profile registered successfully"})
-
 }
+
 
 func GetUserProfile(c echo.Context) error {
 	userID := c.Param("user_id")
